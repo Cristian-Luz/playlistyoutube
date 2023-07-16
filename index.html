@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="style.css" rel="stylesheet" type="text/css">
+      <title>Meditação</title>
+      <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(0, 0, 0);
+            color: white;
+            text-align: center;
+        }
+
+        iframe {
+            margin-top: 5px;
+        }
+        /* Estilos CSS omitidos por brevidade */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .bottom-bar input[type="text"] {
+            flex: 1;
+            max-width: 300px;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .bottom-bar .button-group {
+            display: flex;
+            gap: 5px;
+        }
+        .bottom-bar button {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .bottom-bar button:hover {
+            background-color: #0056b3;
+        }
+    </style>   
+</head>
+<body>
+      <div class="container">
+          <div id="dynamicVideosContainer"></div>
+      </div>
+      <div class="bottom-bar">
+          <input type="text" id="playlistLink" placeholder="Insira o link da playlist">
+          <div class="button-group">
+              <button onclick="addPlaylist()">Adicionar</button>
+              <button onclick="removeLastPlaylist()">Remover</button>
+          </div>
+      </div>
+      <script>
+          var dynamicVideosContainer = document.getElementById('dynamicVideosContainer');
+          var savedPlaylists = JSON.parse(localStorage.getItem('playlists')) || [];
+      
+          // Carrega as playlists salvas
+          savedPlaylists.forEach(function(playlistLink) {
+              addPlaylistToContainer(playlistLink);
+          });
+      
+          function addPlaylist() {
+              var playlistLink = document.getElementById('playlistLink').value;
+      
+              addPlaylistToContainer(playlistLink);
+      
+              // Limpar campo de input
+              document.getElementById('playlistLink').value = '';
+      
+              // Salvar playlist adicionada
+              savedPlaylists.push(playlistLink);
+              localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
+          }
+      
+          function removeLastPlaylist() {
+              var playlistContainers = document.querySelectorAll('.playlist-container');
+              if (playlistContainers.length > 0) {
+                  var lastPlaylistContainer = playlistContainers[playlistContainers.length - 1];
+                  dynamicVideosContainer.removeChild(lastPlaylistContainer);
+      
+                  // Remover última playlist do armazenamento local
+                  savedPlaylists.pop();
+                  localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
+              }
+          }
+      
+          function addPlaylistToContainer(playlistLink) {
+              var playlistCode = extractPlaylistCode(playlistLink);
+              if (playlistCode) {
+                  var iframeContainer = document.createElement('div');
+                  iframeContainer.innerHTML = `<iframe width="300" height="215" src="https://www.youtube.com/embed/videoseries?list=${playlistCode}" title="YouTube playlist player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                  iframeContainer.classList.add('playlist-container');
+                  dynamicVideosContainer.appendChild(iframeContainer);
+              }
+          }
+      
+          function extractPlaylistCode(playlistLink) {
+              var regex = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/;
+              var match = playlistLink.match(regex);
+              return match ? match[1] : null;
+          }
+      </script>
+</body>
+</html>
+  
+  
