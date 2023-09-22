@@ -57,6 +57,38 @@
         .bottom-bar button:hover {
             background-color: #0056b3;
         }
+
+        /* Estilos para o botão "Remover Playlist" */
+        .bottom-bar button {
+            background-color: #6d08b0; /* Cor de fundo vermelha */
+            color: #ffffff; /* Cor do texto branca */
+            padding: 10px 20px; /* Espaçamento interno (vertical horizontal) */
+            border-radius: 5px; /* Borda arredondada */
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .bottom-bar button:hover {
+            background-color: #c36aff; /* Cor de fundo vermelha mais clara no hover */
+        }
+
+        /* Estilos para a classe .remove-button */
+        .remove-button {
+            background-color:#9738d6; /* Cor de fundo vermelha */
+            color: #ffffff; /* Cor do texto branca */
+            padding: 5px 10px; /* Espaçamento interno (vertical horizontal) */
+            border-radius: 5px; /* Borda arredondada */
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-button:hover {
+            background-color: #c36aff; /* Cor de fundo vermelha mais clara no hover */
+        }
+
+
     </style>   
 </head>
 <body>
@@ -67,7 +99,6 @@
           <input type="text" id="playlistLink" placeholder="Insira o link da playlist">
           <div class="button-group">
               <button onclick="addPlaylist()">Adicionar</button>
-              <button onclick="removeLastPlaylist()">Remover</button>
           </div>
       </div>
       <script>
@@ -92,27 +123,62 @@
               localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
           }
       
-          function removeLastPlaylist() {
-              var playlistContainers = document.querySelectorAll('.playlist-container');
-              if (playlistContainers.length > 0) {
-                  var lastPlaylistContainer = playlistContainers[playlistContainers.length - 1];
-                  dynamicVideosContainer.removeChild(lastPlaylistContainer);
-      
-                  // Remover última playlist do armazenamento local
-                  savedPlaylists.pop();
-                  localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
-              }
-          }
+          
       
           function addPlaylistToContainer(playlistLink) {
-              var playlistCode = extractPlaylistCode(playlistLink);
-              if (playlistCode) {
-                  var iframeContainer = document.createElement('div');
-                  iframeContainer.innerHTML = `<iframe width="300" height="215" src="https://www.youtube.com/embed/videoseries?list=${playlistCode}" title="YouTube playlist player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-                  iframeContainer.classList.add('playlist-container');
-                  dynamicVideosContainer.appendChild(iframeContainer);
-              }
-          }
+            var playlistCode = extractPlaylistCode(playlistLink);
+            if (playlistCode) {
+                var iframeContainer = document.createElement('div');
+                iframeContainer.classList.add('playlist-container');
+
+                var iframe = document.createElement('iframe');
+                iframe.width = "300";
+                iframe.height = "215";
+                iframe.src = `https://www.youtube.com/embed/videoseries?list=${playlistCode}`;
+                iframe.title = "YouTube playlist player";
+                iframe.frameBorder = "0";
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                iframe.allowFullscreen = true;
+
+                iframeContainer.appendChild(iframe);
+
+                var removeButton = document.createElement('button');
+                removeButton.textContent = 'Remover Playlist';
+                removeButton.className = 'remove-button'; // Adiciona uma classe chamada "remove-button"
+                removeButton.addEventListener('click', function () {
+                    console.log('Clicou em Remover Playlist para:', playlistCode);
+                    removePlaylist(iframeContainer, playlistLink);
+                });
+
+                // Centralizar o botão verticalmente
+                var buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.justifyContent = 'center';
+                buttonContainer.appendChild(removeButton);
+
+                iframeContainer.appendChild(buttonContainer);
+
+                dynamicVideosContainer.appendChild(iframeContainer);
+            }
+        }
+
+        function removePlaylist(iframeContainer, playlistLink) {
+            console.log('Removendo playlist:', playlistLink);
+            dynamicVideosContainer.removeChild(iframeContainer);
+
+            // Remover a playlist da lista salva
+            savedPlaylists = savedPlaylists.filter(function (item) {
+                return item !== playlistLink;
+            });
+
+            console.log('Novas playlists salvas:', savedPlaylists);
+
+            // Atualizar a localStorage com a nova lista de playlists
+            localStorage.setItem('playlists', JSON.stringify(savedPlaylists));
+        }
+
+
+
       
           function extractPlaylistCode(playlistLink) {
               var regex = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/;
